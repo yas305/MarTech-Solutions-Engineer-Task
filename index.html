@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Market Filter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .filters {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        input,
+        select {
+            padding: 5px;
+            margin: 5px;
+        }
+
+        #marketList {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #marketList li {
+            background: #f4f4f4;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Market Filter</h1>
+        <div class="filters">
+            <input type="text" id="nameFilter" placeholder="Filter by name">
+            <input type="number" id="minOdds" placeholder="Min odds">
+            <input type="number" id="maxOdds" placeholder="Max odds">
+            <select id="suspendedFilter">
+                <option value="">All</option>
+                <option value="true">Suspended</option>
+                <option value="false">Not Suspended</option>
+            </select>
+            <button onclick="applyFilters()">Apply Filters</button>
+        </div>
+        <ul id="marketList"></ul>
+    </div>
+
+    <script>
+        let markets = [];
+
+        fetch('dataSourceData.json')
+            .then(response => response.json())
+            .then(data => {
+                markets = data.event.markets;
+                displayMarkets(markets);
+            })
+            .catch(error => console.error('Error:', error));
+
+        function applyFilters() {
+            const nameFilter = document.getElementById('nameFilter').value.toLowerCase();
+            const minOdds = parseFloat(document.getElementById('minOdds').value) || 0;
+            const maxOdds = parseFloat(document.getElementById('maxOdds').value) || Infinity;
+            const suspendedFilter = document.getElementById('suspendedFilter').value;
+
+            const filteredMarkets = markets.filter(market => {
+                const nameMatch = market.name.toLowerCase().includes(nameFilter);
+                const oddsMatch = market.selections.some(selection =>
+                    selection.odds >= minOdds && selection.odds <= maxOdds
+                );
+                const suspendedMatch = suspendedFilter === '' || market.suspended.toString() === suspendedFilter;
+
+                return nameMatch && oddsMatch && suspendedMatch;
+            });
+
+            displayMarkets(filteredMarkets);
+        }
+
+        function displayMarkets(markets) {
+            const marketList = document.getElementById('marketList');
+            marketList.innerHTML = '';
+
+            markets.forEach(market => {
+                const li = document.createElement('li');
+                li.textContent = `${market.name} - Suspended: ${market.suspended}`;
+                market.selections.forEach(selection => {
+                    const p = document.createElement('p');
+                    p.textContent = `${selection.name}: ${selection.odds}`;
+                    li.appendChild(p);
+                });
+                marketList.appendChild(li);
+            });
+        }
+    </script>
+</body>
+
+</html>
