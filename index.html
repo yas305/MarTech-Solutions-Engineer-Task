@@ -80,21 +80,19 @@
 
         function applyFilters() {
             const nameFilter = document.getElementById('nameFilter').value.toLowerCase();
-            const minOdds = parseFloat(document.getElementById('minOdds').value) || 0;
-            const maxOdds = parseFloat(document.getElementById('maxOdds').value) || Infinity;
-            const suspendedFilter = document.getElementById('suspendedFilter').value;
+    const minOdds = parseFloat(document.getElementById('minOdds').value) || 0;
+    const maxOdds = parseFloat(document.getElementById('maxOdds').value) || Infinity;
 
-            const filteredMarkets = markets.filter(market => {
-                const nameMatch = market.name.toLowerCase().includes(nameFilter);
-                const oddsMatch = market.selections.some(selection =>
-                    selection.odds >= minOdds && selection.odds <= maxOdds
-                );
-                const suspendedMatch = suspendedFilter === '' || market.suspended.toString() === suspendedFilter;
+    const filteredMarkets = markets.filter(market => {
+        const nameMatch = market.name.toLowerCase().includes(nameFilter);
+        const oddsMatch = market.selections.some(selection =>
+            selection.odds >= minOdds && selection.odds <= maxOdds
+        );
 
-                return nameMatch && oddsMatch && suspendedMatch;
-            });
+        return nameMatch && oddsMatch;
+    });
 
-            displayMarkets(filteredMarkets);
+    displayMarkets(filteredMarkets);
         }
 
         function displayMarkets(markets) {
